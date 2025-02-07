@@ -1,6 +1,6 @@
-import { Tabs } from "expo-router"
+import { Tabs } from "expo-router";
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { Text } from "react-native";
+import { View, StyleSheet } from "react-native";
 
 export default function Layout() {
 
@@ -12,24 +12,50 @@ export default function Layout() {
                     title: 'Home',
                     tabBarActiveTintColor: 'orange',
                     tabBarInactiveTintColor: 'gray',
-                    tabBarIcon: ({ color }) => (
+                    tabBarIcon: ({ color, focused }) => (
+                        <View style={[
+                            styles.iconContainer, 
+                            { backgroundColor: focused ? 'orange' : 'transparent' }
+                        ]}>
                             <MaterialIcons 
-                                color={color}
-                                size={24} 
+                                color={focused ? 'white' : color}
+                                size={28} 
                                 name="home" />
+                        </View>
                     )
                 }}
             />
             <Tabs.Screen 
-                name="exercises"
+                name="Exercise"
                 options={{
+                    title: 'Exercise',
                     tabBarActiveTintColor: 'orange',
                     tabBarInactiveTintColor: 'gray',
-                    title: 'Exercises',
-                    tabBarIcon: () => <MaterialIcons size={24} name="5k-plus" />
-
-                }}
+                    tabBarIcon: ({ color, focused }) => (
+                        <View style={[
+                            styles.iconContainer, 
+                            { backgroundColor: focused ? 'orange' : 'transparent' }
+                        ]}>
+                            <MaterialIcons 
+                                color={focused ? 'white' : color}
+                                size={28} 
+                                name="person" />
+                        </View>
+                    )
+                }}  
             />
+           
         </Tabs>
     )
 }
+
+const styles = StyleSheet.create({
+    iconContainer: {
+        width: 40, // Adjust width for circular icon background
+        height: 40, // Adjust height for circular icon background
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 20, // Makes the background circular
+        padding: 5, // Padding to give some space around the icon
+    }
+});

@@ -6,21 +6,36 @@ export default function Exercises() {
 
     const exercises = [
         {
-            title: 'Create a Login Screen',
+            title: 'Exercise 3',
             description: `
+            <ul><Strong>Create a Login Screen</Strong></ul>
+            <ul>Login Screen</ul>
                 <ul>
                     <li>Email (Text Input)</li>
                     <li>Password (Text Input)</li>
                     <li>Login (Button)</li>
                 </ul>
-                Add a title and description to the card. When the card is clicked, it should redirect to the login screen.
+                
             `,
             href: '/login'
         },
-        { title: 'Exercise 4', description: 'Desc', href: '/' },
+        {
+            title: 'Exercise 4',
+            description: `
+            <ul>Create a Register Screen</ul>
+                <ul>
+                    <li>Email (Text Input)</li>
+                    <li>Password (Text Input)</li>
+                    <li>Login (Button)</li>
+                </ul>
+        
+            `,
+            href: '/login'
+        },
         { title: 'Exercise 5', description: 'Desc', href: '/' },
         { title: 'Exercise 6', description: 'Desc', href: '/' },
         { title: 'Exercise 7', description: 'Desc', href: '/' },
+        { title: 'Exercise 8', description: 'Desc', href: '/' },
     ];
     
 
@@ -35,7 +50,6 @@ export default function Exercises() {
                             <View 
                                 style={styles.container}>
                                 <Text>{exercise.title}</Text>
-                                {/* <Text>{exercise.description}</Text> */}
                                 <HTMLView
                                     value={exercise.description}
                                 />
@@ -51,9 +65,9 @@ export default function Exercises() {
 const styles = StyleSheet.create({
     container: {
         padding: 20,
-        backgroundColor: 'blue',
+        backgroundColor: '#FFD700',
         borderRadius: 10,
         width: '100%',
-        color: 'white'
+        color: 'black'
     }
 })

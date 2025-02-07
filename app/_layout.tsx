@@ -12,7 +12,8 @@ export default function RootLayout() {
             />
           
             <Stack.Screen
-                name="login" />
+                name="login" 
+                />
             <Stack.Screen 
                 name="+not-found.tsx" 
                 options={{

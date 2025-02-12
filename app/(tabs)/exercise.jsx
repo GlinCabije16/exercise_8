@@ -9,7 +9,7 @@ export default function Exercises() {
             title: 'Exercise 3',
             description: `
             <ul><Strong>Create a Login Screen</Strong></ul>
-            <ul>Login Screen</ul>
+            <ul><Strong>Login Screen</Strong></ul>
                 <ul>
                     <li>Email (Text Input)</li>
                     <li>Password (Text Input)</li>
@@ -22,15 +22,14 @@ export default function Exercises() {
         {
             title: 'Exercise 4',
             description: `
-            <ul>Create a Register Screen</ul>
+            <ul><Strong>Create a stopwatch with two buttons<Strong></ul>
                 <ul>
-                    <li>Email (Text Input)</li>
-                    <li>Password (Text Input)</li>
-                    <li>Login (Button)</li>
+                    <li>One for Start/Stop </li>
+                    <li>One for Reset.</li>
                 </ul>
         
             `,
-            href: '/login'
+            href: '/effect'
         },
         { title: 'Exercise 5', description: 'Desc', href: '/' },
         { title: 'Exercise 6', description: 'Desc', href: '/' },

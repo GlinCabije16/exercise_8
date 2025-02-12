@@ -15,11 +15,18 @@ export default function RootLayout() {
                 name="login" 
                 />
             <Stack.Screen 
-                name="+not-found.tsx" 
+                name="+not-found" 
                 options={{
                     headerShown: false,
                 }}
             />
+             <Stack.Screen 
+                name="effect"
+                options={{
+                    headerShown: true,
+                }}/>
+            <Stack.Screen
+                name="state"/>
         </Stack>
     )
 }

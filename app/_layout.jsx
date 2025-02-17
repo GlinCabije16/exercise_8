@@ -27,6 +27,9 @@ export default function RootLayout() {
                 }}/>
             <Stack.Screen
                 name="state"/>
+            
+            <Stack.Screen
+                name="register"/>
         </Stack>
     )
 }

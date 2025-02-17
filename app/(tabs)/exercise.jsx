@@ -31,7 +31,22 @@ export default function Exercises() {
             `,
             href: '/effect'
         },
-        { title: 'Exercise 5', description: 'Desc', href: '/' },
+        {
+            title: 'Exercise 5',
+            description: `
+            <ul><Strong>Create a Register Screen</Strong></ul>
+                <ul>
+              <li>Image Picker (User can select an image)</li>
+                    <li>Name (Text Input)</li>
+                    <li>Email (Text Input)</li>
+                    <li>Password (Text Input)</li>
+                    <li>Register (Button)</li>
+                </ul>
+        
+            `,
+            href: '/register'
+        },
+ 
         { title: 'Exercise 6', description: 'Desc', href: '/' },
         { title: 'Exercise 7', description: 'Desc', href: '/' },
         { title: 'Exercise 8', description: 'Desc', href: '/' },
@@ -43,22 +58,20 @@ export default function Exercises() {
             <View style={{ rowGap: 10 }}>
                 {exercises.map((exercise, index) => {
                     return (
-                        <Link 
-                            key={index}
-                            href={exercise.href}>
-                            <View 
-                                style={styles.container}>
-                                <Text>{exercise.title}</Text>
-                                <HTMLView
+                        <Link key={index} href={exercise.href}>
+                            <View style={styles.container}>
+                                <Text style={styles.title}>{exercise.title}</Text>
+                                <HTMLView 
                                     value={exercise.description}
+                                    stylesheet={styles.html}
                                 />
                             </View>
                         </Link>
-                    )
+                    );
                 })}
             </View>
         </ScrollView>
-    )
+    );
 }
 
 const styles = StyleSheet.create({
@@ -67,6 +80,33 @@ const styles = StyleSheet.create({
         backgroundColor: '#FFD700',
         borderRadius: 10,
         width: '100%',
-        color: 'black'
+    },
+    title: {
+        fontSize: 30, 
+        fontWeight: 'bold',
+        marginBottom: 10,
+    },
+    html: {
+        p: {
+            fontSize: 18, 
+            lineHeight: 24, 
+            marginBottom: 10, 
+        },
+        ul: {
+            marginLeft: 20, 
+            marginBottom: 10, 
+            fontSize: 30,
+           
+        },
+        li: {
+            fontSize: 18, 
+            marginBottom: 5,
+            fontWeight: 'bold',
+            color: 'blue', 
+          
+        },
+        strong: {
+            fontWeight: 'bold', 
+        }
     }
-})
+});

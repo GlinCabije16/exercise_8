@@ -1,25 +1,31 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity } from 'react-native';
+import { useForm, Controller } from 'react-hook-form';
 
 const LoginScreen = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [isPasswordVisible, setPasswordVisible] = useState(false);
 
-  const handleLogin = () => {
-    console.log("Email:", email, "Password:", password);
-  
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    watch
+  } = useForm();
+
+  const handleLogin = (data) => {
+    console.log("Login Data:", data);
   };
 
   const handleFacebookLogin = () => {
-    console.log("Login with Facebook");
- 
+    console.log("Facebook login clicked");
   };
 
   const handleGoogleLogin = () => {
-    console.log("Login with Google");
-   
+    console.log("Google login clicked");
   };
+
+  const email = watch('email');
+  const password = watch('password');
 
   return (
     <View style={styles.container}>
@@ -27,23 +33,52 @@ const LoginScreen = () => {
         <Text style={styles.title}>Login</Text>
         <Text style={styles.description}>Please login your account</Text>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          placeholderTextColor="#888"
-          keyboardType="email-address"
-          value={email}
-          onChangeText={setEmail}
+        {/* Email Field */}
+        <Controller
+          control={control}
+          name="email"
+          rules={{
+            required: 'Email is required',
+            pattern: {
+              value: /^\S+@\S+\.\S+$/,
+              message: 'Enter a valid email address'
+            }
+          }}
+          render={({ field: { onChange, value } }) => (
+            <TextInput
+              style={[styles.input, errors.email && styles.inputError]}
+              placeholder="Email"
+              placeholderTextColor="#888"
+              keyboardType="email-address"
+              value={value}
+              onChangeText={onChange}
+            />
+          )}
         />
-        
+        {errors.email && <Text style={styles.errorText}>{errors.email.message}</Text>}
+
+        {/* Password Field */}
         <View style={styles.passwordContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            placeholderTextColor="#888"
-            secureTextEntry={!isPasswordVisible}
-            value={password}
-            onChangeText={setPassword}
+          <Controller
+            control={control}
+            name="password"
+            rules={{
+              required: 'Password is required',
+              minLength: {
+                value: 6,
+                message: 'Password must be at least 6 characters'
+              }
+            }}
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                style={[styles.input, errors.password && styles.inputError]}
+                placeholder="Password"
+                placeholderTextColor="#888"
+                secureTextEntry={!isPasswordVisible}
+                value={value}
+                onChangeText={onChange}
+              />
+            )}
           />
           <TouchableOpacity
             onPress={() => setPasswordVisible(!isPasswordVisible)}
@@ -52,6 +87,7 @@ const LoginScreen = () => {
             <Text style={styles.eyeText}>{isPasswordVisible ? 'Hide' : 'Show'}</Text>
           </TouchableOpacity>
         </View>
+        {errors.password && <Text style={styles.errorText}>{errors.password.message}</Text>}
 
         <TouchableOpacity style={styles.forgotPasswordContainer}>
           <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
@@ -59,18 +95,24 @@ const LoginScreen = () => {
 
         <Button 
           title="Login" 
-          onPress={handleLogin} 
+          onPress={handleSubmit(handleLogin)} 
           color="#007bff" 
-          disabled={!email || !password} 
+          disabled={!email || !password}
         />
 
         <Text style={styles.orText}>or</Text>
 
         <View style={styles.socialButtonsContainer}>
-          <TouchableOpacity style={[styles.socialButton, { backgroundColor: '#3b5998' }]} onPress={handleFacebookLogin}>
+          <TouchableOpacity 
+            style={[styles.socialButton, { backgroundColor: '#3b5998' }]} 
+            onPress={handleFacebookLogin}
+          >
             <Text style={styles.socialButtonText}>Login with Facebook</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.socialButton, { backgroundColor: '#db4437' }]} onPress={handleGoogleLogin}>
+          <TouchableOpacity 
+            style={[styles.socialButton, { backgroundColor: '#db4437' }]} 
+            onPress={handleGoogleLogin}
+          >
             <Text style={styles.socialButtonText}>Login with Google</Text>
           </TouchableOpacity>
         </View>
@@ -78,6 +120,7 @@ const LoginScreen = () => {
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
@@ -124,6 +167,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
     width: '100%',
+  },
+  inputError: {
+    borderColor: '#e63946',
+  },
+  errorText: {
+    color: '#e63946',
+    fontSize: 13,
+    marginBottom: 8,
+    marginTop: -10,
   },
   passwordContainer: {
     position: 'relative',

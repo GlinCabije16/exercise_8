@@ -1,163 +1,138 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity } from 'react-native';
-import { useForm, Controller } from 'react-hook-form';
+import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, Image, Alert, ScrollView, ActivityIndicator } from 'react-native';
+import { launchImageLibrary } from 'react-native-image-picker';
+import auth from '@react-native-firebase/auth';
+import storage from '@react-native-firebase/storage';
+import firestore from '@react-native-firebase/firestore';
+import { v4 as uuidv4 } from 'uuid';  // For unique file names
 
-const RegistrationScreen = () => {
-  const [isPasswordVisible, setPasswordVisible] = useState(false);
-  const [isConfirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+const RegistrationScreen = ({ navigation }) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [profileImage, setProfileImage] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-    watch
-  } = useForm();
+  const handleRegister = async () => {
+    if (password !== confirmPassword) {
+      Alert.alert('Password Mismatch', 'Make sure both passwords are the same.');
+      return;
+    }
 
-  const handleRegister = (data) => {
-    console.log("Registration Data:", data);
+    if (!email || !password) {
+      Alert.alert('Missing Fields', 'Please fill in all fields.');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const userCredential = await auth().createUserWithEmailAndPassword(email, password);
+      console.log('User Registered:', userCredential.user);
+
+      if (profileImage) {
+        const fileName = profileImage.fileName || `${uuidv4()}.jpg`;  // Use UUID for uniqueness
+        const reference = storage().ref(`/users/${userCredential.user.uid}/${fileName}`);
+        await reference.putFile(profileImage.uri);
+
+        const downloadURL = await reference.getDownloadURL();
+        console.log('Profile Image URL:', downloadURL);
+
+        await firestore()
+          .collection('users')
+          .doc(userCredential.user.uid)
+          .set({
+            email: email,
+            profileImageUrl: downloadURL,
+          });
+      }
+
+      Alert.alert('Success', 'Registration completed!');
+      setEmail('');
+      setPassword('');
+      setConfirmPassword('');
+      setProfileImage(null);
+      navigation.navigate('Home');  // Redirect after registration
+
+    } catch (error) {
+      console.error('Error in registration:', error);
+      Alert.alert('Registration Error', error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const email = watch('email');
-  const password = watch('password');
-  const confirmPassword = watch('confirmPassword');
+  const handleImagePick = () => {
+    launchImageLibrary({ mediaType: 'photo' }, (response) => {
+      if (response.assets && response.assets.length > 0) {
+        setProfileImage(response.assets[0]);
+      }
+    });
+  };
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.card}>
         <Text style={styles.title}>Register</Text>
-        <Text style={styles.description}>Create a new account</Text>
+        <Text style={styles.description}>Create your new account</Text>
 
-        {/* Email Field */}
-        <Controller
-          control={control}
-          name="email"
-          rules={{
-            required: 'Email is required',
-            pattern: {
-              value: /^\S+@\S+\.\S+$/,
-              message: 'Enter a valid email address'
-            }
-          }}
-          render={({ field: { onChange, value } }) => (
-            <TextInput
-              style={[styles.input, errors.email && styles.inputError]}
-              placeholder="Email"
-              placeholderTextColor="#888"
-              keyboardType="email-address"
-              value={value}
-              onChangeText={onChange}
-            />
-          )}
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          keyboardType="email-address"
+          value={email}
+          onChangeText={setEmail}
+          placeholderTextColor="#888"
         />
-        {errors.email && <Text style={styles.errorText}>{errors.email.message}</Text>}
-
-        {/* Password Field */}
-        <View style={styles.passwordContainer}>
-          <Controller
-            control={control}
-            name="password"
-            rules={{
-              required: 'Password is required',
-              minLength: {
-                value: 6,
-                message: 'Password must be at least 6 characters'
-              }
-            }}
-            render={({ field: { onChange, value } }) => (
-              <TextInput
-                style={[styles.input, errors.password && styles.inputError]}
-                placeholder="Password"
-                placeholderTextColor="#888"
-                secureTextEntry={!isPasswordVisible}
-                value={value}
-                onChangeText={onChange}
-              />
-            )}
-          />
-          <TouchableOpacity
-            onPress={() => setPasswordVisible(!isPasswordVisible)}
-            style={styles.eyeIcon}
-          >
-            <Text style={styles.eyeText}>{isPasswordVisible ? 'Hide' : 'Show'}</Text>
-          </TouchableOpacity>
-        </View>
-        {errors.password && <Text style={styles.errorText}>{errors.password.message}</Text>}
-
-        {/* Confirm Password Field */}
-        <View style={styles.passwordContainer}>
-          <Controller
-            control={control}
-            name="confirmPassword"
-            rules={{
-              required: 'Confirm your password',
-              validate: value => value === password || 'Passwords do not match'
-            }}
-            render={({ field: { onChange, value } }) => (
-              <TextInput
-                style={[styles.input, errors.confirmPassword && styles.inputError]}
-                placeholder="Confirm Password"
-                placeholderTextColor="#888"
-                secureTextEntry={!isConfirmPasswordVisible}
-                value={value}
-                onChangeText={onChange}
-              />
-            )}
-          />
-          <TouchableOpacity
-            onPress={() => setConfirmPasswordVisible(!isConfirmPasswordVisible)}
-            style={styles.eyeIcon}
-          >
-            <Text style={styles.eyeText}>{isConfirmPasswordVisible ? 'Hide' : 'Show'}</Text>
-          </TouchableOpacity>
-        </View>
-        {errors.confirmPassword && <Text style={styles.errorText}>{errors.confirmPassword.message}</Text>}
-
-        <Button 
-          title="Register" 
-          onPress={handleSubmit(handleRegister)} 
-          color="#007bff" 
-          disabled={!email || !password || !confirmPassword}
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+          placeholderTextColor="#888"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Confirm Password"
+          secureTextEntry
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          placeholderTextColor="#888"
         />
 
-        <Text style={styles.orText}>or</Text>
+        <TouchableOpacity style={styles.uploadButton} onPress={handleImagePick}>
+          <Text style={styles.uploadButtonText}>Pick Profile Image</Text>
+        </TouchableOpacity>
 
-        <View style={styles.socialButtonsContainer}>
-          <TouchableOpacity 
-            style={[styles.socialButton, { backgroundColor: '#3b5998' }]} 
-            onPress={() => console.log("Facebook registration clicked")}
-          >
-            <Text style={styles.socialButtonText}>Register with Facebook</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.socialButton, { backgroundColor: '#db4437' }]} 
-            onPress={() => console.log("Google registration clicked")}
-          >
-            <Text style={styles.socialButtonText}>Register with Google</Text>
-          </TouchableOpacity>
-        </View>
+        {profileImage && <Image source={{ uri: profileImage.uri }} style={styles.profileImage} />}
+
+        {loading ? (
+          <ActivityIndicator size="large" color="#007bff" />
+        ) : (
+          <Button title="Register" onPress={handleRegister} color="#007bff" />
+        )}
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
-// Same style object, with error handling styles added
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    paddingVertical: 40,
+    backgroundColor: '#FFD700',
+    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#FFD700',
-    padding: 20,
   },
   card: {
     padding: 25,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#fff',
     borderRadius: 10,
     elevation: 8,
     width: '85%',
     maxWidth: 400,
     minWidth: 300,
-    marginBottom: 20,
     shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 5 },
@@ -166,13 +141,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '600',
-    marginBottom: 15,
+    marginBottom: 10,
     color: '#333',
     textAlign: 'center',
   },
   description: {
     fontSize: 16,
-    marginBottom: 25,
+    marginBottom: 20,
     color: '#555',
     textAlign: 'center',
   },
@@ -185,49 +160,24 @@ const styles = StyleSheet.create({
     paddingLeft: 15,
     fontSize: 16,
     color: '#333',
-    width: '100%',
   },
-  inputError: {
-    borderColor: '#e63946',
-  },
-  errorText: {
-    color: '#e63946',
-    fontSize: 13,
-    marginBottom: 8,
-    marginTop: -10,
-  },
-  passwordContainer: {
-    position: 'relative',
-  },
-  eyeIcon: {
-    position: 'absolute',
-    right: 10,
-    top: 10,
-    padding: 5,
-  },
-  eyeText: {
-    color: '#007bff',
-    fontSize: 16,
-  },
-  orText: {
-    fontSize: 16,
-    color: '#888',
-    textAlign: 'center',
-    marginVertical: 10,
-  },
-  socialButtonsContainer: {
-    marginTop: 20,
-    width: '100%',
-  },
-  socialButton: {
+  uploadButton: {
+    backgroundColor: '#007bff',
     padding: 12,
     borderRadius: 8,
-    marginBottom: 10,
     alignItems: 'center',
+    marginBottom: 20,
   },
-  socialButtonText: {
+  uploadButtonText: {
     color: '#fff',
     fontSize: 16,
+  },
+  profileImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    alignSelf: 'center',
+    marginBottom: 20,
   },
 });
 
